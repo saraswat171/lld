@@ -1,0 +1,199 @@
+ATM
+ ├── ATMState (State Pattern)
+ │      ├── IdleState
+ │      ├── HasCardState
+ │      ├── SelectOperationState
+ │      ├── CashWithdrawalState
+ │      └── CheckBalanceState
+ │
+ ├── CashInventory
+ ├── Card
+ ├── BankAccount
+ └── Transactions
+
+ UML========DIAGRAM
+
+ +--------------------------------------------------+
+|                     ATM                          |
++--------------------------------------------------+
+| - currentState : ATMState*                       |
+| - currentCard  : Card*                           |
+| - cashInventory : CashInventory                  |
++--------------------------------------------------+
+| + setState()                                     |
+| + insertCard()                                   |
+| + authenticatePin()                              |
+| + selectOperation()                              |
+| + withdrawCash()                                 |
+| + checkBalance()                                 |
+| + ejectCard()                                    |
++--------------------------------------------------+
+                    |
+                    |
+                    v
++--------------------------------------------------+
+|                  ATMState                        |
++--------------------------------------------------+
+| + insertCard()                                   |
+| + authenticatePin()                              |
+| + selectOperation()                              |
+| + cashWithdrawal()                               |
+| + displayBalance()                               |
+| + ejectCard()                                    |
++--------------------------------------------------+
+       ^             ^               ^
+       |             |               |
+       |             |               |
++-------------+ +-------------+ +-------------------+
+| IdleState   | | HasCardState| | SelectOperation   |
++-------------+ +-------------+ +-------------------+
+                                      ^
+                                      |
+                       +--------------+-------------+
+                       |                            |
+                       |                            |
+              +----------------+         +-------------------+
+              | WithdrawalState|         | CheckBalanceState|
+              +----------------+         +-------------------+
+
+
++--------------------------------------------------+
+|                     Card                         |
++--------------------------------------------------+
+| - cardNumber : string                            |
+| - pin : int                                      |
+| - account : BankAccount*                         |
++--------------------------------------------------+
+| + validatePin()                                  |
++--------------------------------------------------+
+
+
++--------------------------------------------------+
+|                 BankAccount                      |
++--------------------------------------------------+
+| - accountNumber : string                         |
+| - balance : double                               |
++--------------------------------------------------+
+| + withdraw()                                     |
+| + deposit()                                      |
+| + getBalance()                                   |
++--------------------------------------------------+
+
+
++--------------------------------------------------+
+|               CashInventory                      |
++--------------------------------------------------+
+| - denominationMap                                |
+| - totalCash                                      |
++--------------------------------------------------+
+| + hasSufficientCash()                            |
+| + dispenseCash()                                 |
+| + addCash()                                      |
++--------------------------------------------------+
+
+
+==========================FLOW=======================
+
+MAIN FLOW======================>>
+
+                    +----------------+
+                    |   Idle State   |
+                    +----------------+
+                             |
+                             | insertCard()
+                             v
+                    +----------------+
+                    | Has Card State |
+                    +----------------+
+                             |
+                             | authenticatePin()
+                             v
+                 +-------------------------+
+                 | Select Operation State  |
+                 +-------------------------+
+                    /                 \
+                   /                   \
+                  v                     v
+
+        +-------------------+   +-------------------+
+        | Withdrawal State  |   | CheckBalanceState |
+        +-------------------+   +-------------------+
+                  |                      |
+                  | complete             | complete
+                  v                      v
+
+               +-----------------------------+
+               |         Eject Card          |
+               +-----------------------------+
+                             |
+                             v
+                    +----------------+
+                    |   Idle State   |
+                    +----------------+
+
+
+ FAILED PIN FLOW ===================>>
+
+Insert Card
+     ↓
+Enter PIN
+     ↓
+Incorrect PIN?
+     ↓
+Retry Count < 3
+     ↓
+Try Again
+
+OR
+
+Retry Count == 3
+     ↓
+Retain Card
+     ↓
+Go to Idle State    
+
+
+
+WITHDRAW FLOW =============+>>
+
+User selects Withdraw
+        ↓
+Enter Amount
+        ↓
+Check Account Balance
+        ↓
+Check ATM Cash
+        ↓
+Deduct Account Balance
+        ↓
+Dispense Cash
+        ↓
+Print Receipt
+        ↓
+Return Card
+
+
+CHECK BALANCE FLOW ===============+>>
+
+User selects Balance Inquiry
+        ↓
+Fetch Account Balance
+        ↓
+Display Balance
+        ↓
+Return Card
+
+
+
+
+1. ATM is the central controller.
+
+2. ATM delegates behavior to ATMState.
+
+3. Each state controls allowed operations.
+
+4. Card is linked to BankAccount.
+
+5. CashInventory manages ATM cash.
+
+6. State transitions occur after each operation.

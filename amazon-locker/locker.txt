@@ -1,0 +1,271 @@
+Locker={
+    lockerId
+    zipCode
+    List<LockerSlot> slots
+
+    getAvailableSlots()
+ }
+
+
+LockerSlot ={
+
+    slotId
+    SlotSize size
+    Package assignedPackage
+
+    canFit(package)
+    assignPackage(package)
+    removePackage()
+    isAvailable()
+}
+
+
+Package={
+
+    packageId
+    PackageSize size
+    Customer customer
+    DeliveryAgent agent
+    PackageStatus status
+    LockerSlot slot
+}
+
+PickupCode={
+
+    code
+    expiryTime
+    isUsed
+    Package package
+}
+
+User ={
+
+    id
+    name
+    email
+    phone
+    address
+}
+
+Customer extends User
+DeliveryAgent extends User
+
+lockerManager = {
+        assignLocker(package)
+    releaseLocker(slot)
+    findAvailableSlot(size)
+}
+
+otpService {
+    create and validate otp
+    create otp 
+
+    validate otp,
+}
+
+LockerAllocationStrategy={
+
+    findSlot(package)
+}
+
+
+enum PackageStatus ={
+
+    CREATED
+    ASSIGNED_TO_AGENT
+    OUT_FOR_DELIVERY
+    DELIVERED_TO_LOCKER
+    PICKED_UP
+    EXPIRED
+    RETURNED
+}
+
+    enum SlotSize ={
+
+    SMALL
+    MEDIUM
+    LARGE
+    }
+
+    Locker 1 ---- * LockerSlot
+
+LockerSlot 1 ---- 0..1 Package
+
+Package 1 ---- 1 Customer
+
+Package 1 ---- 1 DeliveryAgent
+
+Package 1 ---- 1 PickupCode
+
+
+NotificationService ={
+sendOTP()
+sendPickupReminder()
+}
+
+
+Final uml class diagram :-
++-------------------+
+|      Locker       |
++-------------------+
+| lockerId          |
+| zipCode           |
+| slots             |
++-------------------+
+| getAvailableSlots |
++-------------------+
+
+          1
+          |
+          | contains
+          | (composition)
+          *
++-------------------+
+|    LockerSlot     |
++-------------------+
+| slotId            |
+| size              |
+| assignedPackage   |
++-------------------+
+| canFit()          |
+| assignPackage()   |
+| removePackage()   |
+| isAvailable()     |
++-------------------+
+
+          0..1
+          |
+          | assigned
+          |
+          1
++-------------------+
+|      Package      |
++-------------------+
+| packageId         |
+| size              |
+| status            |
+| customer          |
+| agent             |
+| slot              |
++-------------------+
+
+      1         1
+      |         |
+      |         |
+      |         |
++-------------+ +----------------+
+|  Customer   | | DeliveryAgent  |
++-------------+ +----------------+
+
+        extends User
+
++-------------------+
+|       User        |
++-------------------+
+| id                |
+| name              |
+| email             |
+| phone             |
+| address           |
++-------------------+
+
+          1
+          |
+          |
+          1
++-------------------+
+|    PickupCode     |
++-------------------+
+| code              |
+| expiryTime        |
+| isUsed            |
++-------------------+
+
++--------------------------------+
+|         LockerManager          |
++--------------------------------+
+| assignLocker(package)          |
+| releaseLocker(slot)            |
+| findAvailableSlot(size)        |
++--------------------------------+
+
+                uses
+                 |
+                 v
+
++--------------------------------+
+| LockerAllocationStrategy       |
++--------------------------------+
+| findSlot(package, lockers)     |
++--------------------------------+
+
+                 ^
+                 |
+    +---------------------------+
+    | BestFitAllocationStrategy |
+    +---------------------------+
+
+
+    Delivery flow=======================================>>>>>>>>>>>>>>>>
+
+DeliveryAgent
+    |
+    | deliverPackage(package)
+    v
+
+LockerManager
+    |
+    | findAvailableSlot()
+    v
+
+AllocationStrategy
+    |
+    | returns suitable slot
+    v
+
+LockerSlot.assignPackage()
+
+Package.status = DELIVERED_TO_LOCKER
+
+OTPService.generateOTP()
+
+NotificationService.sendOTP()
+
+
+Sequence Flow (pickup)  ===================>>>>>>>>>
+
+Customer enters OTP
+        |
+        v
+
+OTPService.validateOTP()
+
+IF valid:
+    slot opens
+
+LockerSlot.removePackage()
+
+Package.status = PICKED_UP
+
+LockerManager.releaseLocker()
+
+
+Architechure layers :- ====================>>>>>>>>>>>>>>>>
+
+Entities
+    Locker
+    Slot
+    Package
+    User
+
+Services
+    LockerManager
+    OTPService
+    NotificationService
+
+Strategies
+    LockerAllocationStrategy
+
+Enums
+    SlotSize
+    PackageStatus

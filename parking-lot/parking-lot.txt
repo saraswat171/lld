@@ -1,0 +1,199 @@
+Functional Requirements:-
+
+>)Can vehicles enter the parking lot?
+>)Can vehicles exit?
+>)Should parking fees be calculated?
+>)Should different vehicle types be supported?
+>)Can multiple floors exist?
+>)Can we find the nearest available spot?
+>)Can users reserve spots?
+>)Should tickets be generated?
+---------------------------------------------------------------------------------------------------------------------------------------
+
+Non-functional Requirements:-
+
+>)Extensible for new vehicle types.
+>)Thread-safe (if multiple gates operate simultaneously).
+>)Easy to maintain.
+>)OOP principles followed.
+>)Minimal coupling.
+---------------------------------------------------------------------------------------------------------------------------------------
+
+flow:- 
+
+Parking Lot
+    |
+    |-- Multiple Floors
+            |
+            |-- Parking Spots
+                    |
+                    |-- Bike Spot
+                    |-- Car Spot
+                    |-- Truck Spot
+
+Vehicle arrives
+        ↓
+Assign suitable spot
+        ↓
+Generate Ticket
+        ↓
+Vehicle exits
+        ↓
+Calculate Fee
+        ↓
+Free Spot
+---------------------------------------------------------------------------------------------------------------------------------------
+
+CORE ENTITIES:-  
+
+ParkingLot
+ParkingFloor
+ParkingSpot
+Vehicle
+Ticket
+EntranceGate
+ExitGate
+Payment
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+RELATIONSHIPS:-
+
+ParkingLot
+    has many Floors
+
+Floor
+    has many Spots
+
+Spot
+    can hold one Vehicle
+
+Vehicle
+    has one Ticket
+
+ExitGate
+    calculates Payment
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+CLASSES:-
+
+
+Parent class.
+Vehicle  -{
+    licenseNo
+    vehicleType
+
+    park()
+    leave()
+}
+
+
+Children: -{
+    Car
+    Bike
+    Truck
+    ElectricCar
+    Bus
+}
+
+
+ParkingSpot-{
+    id
+    isOccupied
+    spotType
+    vehicle
+
+    assignVehicle()
+
+    removeVehicle()
+
+    canFitVehicle()
+}
+
+
+Children: -{
+    CarSpot
+    BikeSpot
+    TruckSpot
+    Each overrides canFitVehicle().
+}
+
+
+ParkingFloor -{
+    floorNo
+    List<ParkingSpot>
+
+    findAvailableSpot()
+
+    addSpot()
+}
+
+ParkingLot -{
+    name
+    List<Floor>
+    EntryGate
+    ExitGate
+
+    parkVehicle()
+
+    exitVehicle()
+}
+
+
+Ticket -{
+    ticketId
+    entryTime
+    vehicle
+    spot
+    status
+}
+
+
+Payment -{
+    amount
+    paymentType
+    status
+}
+--------------------------------------------------------------------------------------------------------------------------------------------
+facts:-
+
+>) 1. Singleton - Only one parking lot instance.
+>) 2. Factory Pattern - insted of (new Car() ; new Bike() ; new Truck()) use -(VehicleFactory.create(type))
+>) 3. Strategy Pattern - Parking fee calculation may vary.use (FeeStrategy- for ex calculate(ticket) in HourlyStrategy , DailyStrategy , WeekendStrategy etc)
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+CLASS DIAGRAM :-
+
+                 ParkingLot
+                      |
+         --------------------------
+         |                        |
+   ParkingFloor            EntryGate
+         |
+    -----------------
+    |       |       |
+ CarSpot BikeSpot TruckSpot
+      |
+  ParkingSpot
+      |
+    Vehicle
+   /   |    \
+ Car Bike Truck
+
+Ticket ------ Vehicle
+
+ExitGate ---- PaymentStrategy
+
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+RESPONSIBLITY:-
+
+| Class       | Responsibility          |
+| ----------- | ----------------------- |
+| ParkingLot  | Manage the whole system |
+| Floor       | Manage spots on a floor |
+| Spot        | Park/remove a vehicle   |
+| Vehicle     | Vehicle information     |
+| Ticket      | Entry details           |
+| ExitGate    | Exit processing         |
+| FeeStrategy | Fee calculation         |
+| Payment     | Payment handling        |
