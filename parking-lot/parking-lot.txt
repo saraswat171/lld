@@ -148,11 +148,7 @@ Ticket -{
 }
 
 
-Payment -{
-    amount
-    paymentType
-    status
-}
+
 --------------------------------------------------------------------------------------------------------------------------------------------
 facts:-
 
@@ -197,3 +193,61 @@ RESPONSIBLITY:-
 | ExitGate    | Exit processing         |
 | FeeStrategy | Fee calculation         |
 | Payment     | Payment handling        |
+
+...........................................................................................................................................
+
+FINAL ARCHITECTURE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+                        ParkingManager
+                               |
+        -----------------------------------------
+        |                    |                  |
+   ParkingLot          FeeStrategy        Ticket Map
+        |
+        |
+   ParkingFloor
+        |
+        |
+   ParkingSpot (abstract)
+      /      |        \
+ CarSpot BikeSpot TruckSpot
+        |
+        |
+      Vehicle (abstract)
+      /      |         \
+    Car    Bike      Truck
+
+.............................................................................................................................................
+
+CONCLUSION:-
+
+summary of above code:
+The code implements a parking lot system in C++. It defines various classes to represent vehicles, parking spots, parking floors, and the parking lot itself. The `Vehicle` class is a base class
+for specific vehicle types like `Car`, `Motorcycle`, and `Truck`. The `ParkingSpot` class is an abstract base class for different types of parking spots, such as `CarSpot`, `MotorcycleSpot`, and `TruckSpot`. 
+Each parking spot can determine if a vehicle can fit based on its type. The `ParkingFloor` class manages a collection of parking spots, while the `ParkingLot` class manages multiple floors.
+The `Ticket` class represents a parking ticket issued when a vehicle is parked, containing information about the vehicle, the parking spot, and the entry time. 
+The `FeeStrategy` class is an abstract base class for calculating parking fees, with `HourlyFeeStrategy` as a concrete implementation that calculates fees based on the duration of parking. 
+The `ParkingManager` class orchestrates the parking and exiting of vehicles, managing tickets and calculating fees accordingly. The `main` function demonstrates the usage of these classes by
+ creating a parking lot, adding floors and spots, parking vehicles, and calculating fees upon exit.                                         
+
+ explain each class and its purpose and how they interact with each other and which concept they demonstrate:
+1. **Vehicle Class**: This is an abstract base class that represents a generic vehicle. It contains common attributes like `licensePlate` and `type`. 
+                      The class has derived classes (`Car`, `Motorcycle`, and `Truck`) that represent specific types of vehicles.
+                      This demonstrates the concept of inheritance and polymorphism.
+2. **ParkingSpot Class**: This is an abstract base class that represents a generic parking spot. It contains attributes like `spotId`, `type`, and a pointer to the `Vehicle` currently parked in the spot. 
+                          The class has derived classes (`CarSpot`, `MotorcycleSpot`, and `TruckSpot`) that represent specific types of parking spots. Each derived class implements the `canFitVehicle` method to determine if a vehicle can fit in that spot.
+                          This demonstrates the concept of inheritance and polymorphism.
+3. **ParkingFloor Class**: This class represents a floor in the parking lot. It contains a collection of parking spots and provides a method to find an available spot for a given vehicle.
+                          This demonstrates the concept of composition, as it contains multiple `ParkingSpot` objects.
+4. **ParkingLot Class**: This class represents the entire parking lot. It contains a collection of parking floors and provides a method to find an available spot for a given vehicle across all floors. 
+                      This also demonstrates the concept of composition, as it contains multiple `ParkingFloor` objects.
+5. **Ticket Class**: This class represents a parking ticket issued when a vehicle is parked. It contains information about the ticket ID, the vehicle, the parking spot, and the entry time. 
+                      This class is used to manage the parking process and calculate fees upon exit.
+6. **FeeStrategy Class**: This is an abstract base class that defines the interface for calculating parking fees. The `HourlyFeeStrategy` class is a concrete implementation that calculates fees based on the duration of parking. 
+                          This demonstrates the concept of the Strategy design pattern, allowing for different fee calculation strategies to be implemented and used interchangeably.
+7. **ParkingManager Class**: This class manages the parking and exiting of vehicles. It interacts with the `ParkingLot` to find available spots, manages `Ticket` objects for parked vehicles, and uses the `FeeStrategy` 
+                             to calculate fees when vehicles exit. This class orchestrates the overall parking process and demonstrates the concept of separation of concerns, as it handles the business logic of parking 
+                             management while delegating specific tasks to other classes.Overall, the code demonstrates several object-oriented programming concepts, including inheritance, polymorphism, composition, and the 
+                             Strategy design pattern, to create a modular and extensible parking lot system. 
+8. **Main Function**: The `main` function serves as the entry point of the program. It creates a parking lot, adds a floor with various parking spots, and demonstrates the parking and exiting process for different types of vehicles. 
+                      It also simulates a delay to show how fees are calculated based on the duration of parking. This function demonstrates how the different classes interact with each other to achieve the desired functionality of the parking lot system.  

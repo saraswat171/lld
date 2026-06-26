@@ -1,0 +1,267 @@
+Actors:-
+ Rider
+ Driver
+ 
+Functions:-
+    Rider-  Book a ride 
+            cancel a ride 
+            pay the amount
+            rate a ride
+
+    Drivers- accept a ride
+             reject a ride
+             complete a ride
+
+Flow :-  Rider enter source and destination -> enter mode of transport -> book a ride ->
+         driver accept/reject ride -> completes ride  -> rider pay amount -> rider rate the ride  
+
+Entity :-
+    Location
+            - latitude, longitude
+
+    User
+            - id , name , email , phoneNo , location
+
+    Rider extends User
+
+    Driver extends User
+            - vehicle, licenseNo 
+
+    Vehicle
+            - registrationNo, type
+
+    RideRequest
+            - rider, source, destination, vehicleType, status
+
+    Ride
+            - rider, driver, source, destination, vehicle, fare, distance, startTime, endTime, status, rating
+
+    Fare
+            - amount
+
+    Payment
+            - amount, status
+
+    Rating
+            - rating, review   
+
+UML :-
+ 
+  Location
+            - latitude, longitude
+  User
+            - id , name , email , phoneNo , 
+            - HAS-A Location         
+  Rider 
+            - IS-A User
+            - startARide(src,destination)
+            - selectRideType()
+
+  Driver 
+            - licenseNo 
+            - IS-A User
+            - HAS-A Vehicle
+            - actionOnRide()
+  RideRequest
+            - source, destination, vehicleType, status 
+            - Has-A Rider (Aggregation)
+            - Has-A Fare  (Composiiton)
+            - Has-A Vehicle (Aggregation)
+            - requestRide()
+  Ride      
+            - Has-A Rider (Aggregation)
+            - Has-A Driver (Aggregation)
+            - source, destination , distance , startTime, endTime, status
+            - HAS-A Rating (Composiiton)
+            - Has-A Vehicle (Aggregation)
+            - Has-A Payment
+            - Has-A Fare
+            - createRide()
+  Fare     
+            - amount  
+            - calculateFare(distance)->strategy to different vehicle  
+  Payment  
+            - amount , status
+            - acceptPayment()  
+  RideManager
+            - createRide()
+            - completeRide()
+            - cancelRide()
+  DriverManager
+            - getAvailableDrivers()
+            - updateDriverLocation()
+  PaymentManager
+            - processPayment()
+  RatingManager
+            - submitRating()
+  FareManager
+            - calculateFare()
+  MatchingManager
+            - assignDriver()
+
+Rider
+   │
+   ▼
+RideRequest
+   │
+   ▼
+RideManager
+   │
+   ├──► MatchingManager
+   │         │
+   │         ▼
+   │  DriverMatchingStrategy
+   │
+   ├──► FareManager
+   │         │
+   │         ▼
+   │    FareStrategy
+   │
+   └──► Create Ride
+                │
+                ▼
+         PaymentManager
+                │
+                ▼
+         RatingManager
+
+
+         Rider
+   │
+   ▼
+Enter Source & Destination
+   │
+   ▼
+FareManager
+   │
+   ▼
+FareStrategy
+   │
+   ▼
+Estimated Fares
+   │
+   ▼
+User selects CAB
+   │
+   ▼
+RideRequest
+   │
+   ▼
+MatchingManager
+   │
+   ▼
+NearestDriverStrategy
+   │
+   ▼
+Driver Assigned
+   │
+   ▼
+Driver Accepts
+   │
+   ▼
+RideManager
+   │
+   ▼
+Ride Created
+   │
+   ▼
+Ride Starts
+   │
+   ▼
+Ride Completes
+   │
+   ▼
+PaymentManager
+   │
+   ▼
+RatingManager
+
+
+# Implementation Plan - Uber-like Ride Booking System LLD in C++17
+
+We will implement a complete, compile-ready, and runnable Low-Level Design (LLD) for an Uber-like ride booking system in `/home/chetan14/lld/uber/main.cpp`. The code will be organized using clear comment sections to represent different architectural layers (Domain, Application/Service, UI/Simulation) and simulate separate header/source file layouts, conforming to the user's Domain Driven Design (DDD) rules.
+
+## User Review Required
+
+> [!IMPORTANT]
+> - **Rider Location**: As explicitly requested by the user ("i dont want location for rider"), the `Location` member is removed from the `Rider` class. The `location` member is kept in `Driver` (to support driver matching strategies like `NearestDriverStrategy`). The base class `User` will not contain a location, only common attributes like `id`, `name`, `email`, and `phoneNo`.
+> - **Single-File Structure**: To match the pattern observed in other project directories (e.g., `parking-lot`), we will implement the entire solution in `/home/chetan14/lld/uber/main.cpp`, but with clean structural boundaries, distinct sections, and headers simulated as code blocks.
+> - **Smart Pointers**: We will use `std::shared_ptr` for entities that need to be shared (like `Rider`, `Driver`, `RideRequest`, `Ride`) to ensure clean memory management without raw pointers.
+
+## Proposed Changes
+
+### Layer Separation in `main.cpp`
+We will structure the code into three main layers inside `/home/chetan14/lld/uber/main.cpp`:
+1. **Domain Layer**: Contains enumerations, core entity classes (`Location`, `Vehicle`, `User`, `Rider`, `Driver`, `Fare`, `Payment`, `Rating`, `RideRequest`, `Ride`), and interfaces/strategies (`FareStrategy`, `DriverMatchingStrategy`). It has zero dependencies on external frameworks.
+2. **Application Layer**: Contains Orchestrators and Managers (`DriverManager`, `FareManager`, `MatchingManager`, `PaymentManager`, `RatingManager`, `RideManager`). All business logic resides here.
+3. **UI / Simulation Layer**: Contains the `main()` function demonstrating the full flow step-by-step with clean output logging.
+
+---
+
+### Component Details
+
+#### [MODIFY] [main.cpp](file:///home/chetan14/lld/uber/main.cpp)
+We will overwrite `main.cpp` with the complete implementation.
+
+##### **1. Domain Entities & Value Objects**
+- **Location**: `latitude`, `longitude` (value object, getters).
+- **Vehicle**: `registrationNo`, `type` (BIKE, AUTO, CAB).
+- **User (Abstract Base)**: `id`, `name`, `email`, `phoneNo`.
+- **Rider (IS-A User)**:
+  - Methods: `requestRide(Location src, Location dest)`, `selectVehicleType()`, `payRide()`, `rateRide()`. These will log actions and trigger corresponding manager functions (no business logic in Rider).
+- **Driver (IS-A User)**:
+  - Members: `licenseNo`, `vehicle`, `available` (bool), `location`.
+  - Methods: `acceptRide()`, `rejectRide()`, `startRide()`, `completeRide()`, `isAvailable()`, `setAvailability()`.
+- **Fare**: `amount` (value object).
+- **Payment**: `amount`, `status` (PENDING, SUCCESS, FAILED), `processPayment()`.
+- **Rating**: `rating` (int 1-5), `review` (string).
+- **RideRequest**: `rider`, `source`, `destination`, `vehicleType`, `estimatedFare`, `status` (REQUESTED, etc.).
+- **Ride**: `rider`, `driver`, `vehicle`, `source`, `destination`, `finalFare`, `payment`, `rating`, `status`, `startTime`, `endTime`, `distance`. Methods to start, complete, and cancel.
+
+##### **2. Strategy Pattern**
+- **Fare Calculation Strategy**:
+  - `FareStrategy` interface.
+  - `BikeFareStrategy` (Rate: $8.0/unit distance).
+  - `AutoFareStrategy` (Rate: $12.0/unit distance).
+  - `CabFareStrategy` (Rate: $18.0/unit distance).
+- **Driver Matching Strategy**:
+  - `DriverMatchingStrategy` interface.
+  - `NearestDriverStrategy` (Euclidean distance search from request source location to driver location).
+  - `HighestRatedDriverStrategy` (Finds the driver with the highest rating).
+
+##### **3. Managers (Application Services)**
+- **DriverManager**: Thread-safe (or simple collection) registration, location updates, and retrieving available drivers.
+- **FareManager**: Keeps instances of the fare strategies and computes estimated fares for all vehicle types.
+- **MatchingManager**: Performs driver assignments based on the chosen matching strategy.
+- **PaymentManager**: Processes payment for a ride, updating payment status.
+- **RatingManager**: Processes and submits user rating/review.
+- **RideManager**: Orchestrator coordinating all booking steps, creating the ride, starting it, completing it, and handling state transitions.
+
+##### **4. main() Flow Demo**
+We will instantiate:
+- 1 Rider: "Alice"
+- 3 Drivers:
+  - "Bob" (CAB, Location: [10.0, 10.0], Rating: 4.8)
+  - "Charlie" (AUTO, Location: [5.0, 5.0], Rating: 4.5)
+  - "David" (CAB, Location: [2.0, 2.0], Rating: 4.9)
+- Run the simulation from source [0.0, 0.0] to destination [3.0, 4.0] (Distance = 5.0).
+- Match CAB driver (nearest driver is David at distance $\sqrt{2^2 + 2^2} \approx 2.83$ vs Bob at distance $\sqrt{10^2+10^2} \approx 14.14$).
+- Walk through acceptance, starting the ride, completion, payment processing, and rating.
+
+---
+
+## Verification Plan
+
+### Automated Verification
+We will compile the code using `g++` with C++17 support and run it to verify the entire printed booking flow:
+```bash
+g++ -std=c++17 -Wall -Wextra /home/chetan14/lld/uber/main.cpp -o /home/chetan14/lld/uber/main
+/home/chetan14/lld/uber/main
+```
+
+### Manual Verification
+- Verify that there are no compilation errors or memory leaks.
+- Ensure that the console logs print step-by-step information matching the requirements.
+- Confirm that `Rider` has no location member.
+
+                     

@@ -1,0 +1,67 @@
+actors:-
+ user , board 
+
+Game
+ ├── Board
+ ├── vector<Player>
+ ├── WinningStrategy
+ ├── stack<Move>        (optional)
+ ├── currentPlayerIndex
+ └── GameStatus
+
+Board
+ ├── size
+ └── vector<vector<Cell>>
+
+Cell
+ └── Symbol
+
+Player
+ ├── name
+ └── Symbol
+
+Move
+ ├── row
+ ├── col
+ └── Symbol (or Player*)
+
+WinningStrategy
+ └── checkWin(Board&, Move&)
+
+Game:
+board , players , strategy , currentINdexPLayer , status
+  - startGame()
+  - makeMove()
+  - checkGameStatus()
+  - trackTurns()
+
+Player:
+  name , symbol
+  - chooseMove()
+
+Board:
+  size , vector<Cell> , 
+  - placeMove()
+  - isValidMove()
+  - getCell()
+  - display()
+
+WinningStrategy:
+  - checkWin()
+
+Cell:
+  symbol
+  - store symbol
+  - know whether occupied   
+
+Move
+ row , col  , symbol
+     
+Board Has-A(Composite) Cell
+Game Has-A(Aggregate)  Player
+Game Has-A(Aggregate)  WinningStrategy
+Player Has-A(association) Move
+
+
+
+
