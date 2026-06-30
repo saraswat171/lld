@@ -1,0 +1,163 @@
+ Functional Requirements --------->>>>>>>>>>>>>>>
+>>User Management
+    A user can exist in the system.
+    A user can be added to one or more groups.
+    A user can belong to multiple groups.
+
+>>Group Management
+    A user can create a group.
+    A group can have multiple members.
+    Expenses can be created within a group.
+    
+>>Expense Management
+    A user can add an expense.
+    An expense contains:
+        Amount
+        Currency
+        Description/Reason
+        Payer (the user who paid)
+    While adding an expense, the user can choose which group members participated.
+        Members not selected are excluded from that expense.
+    The expense amount is split equally among the selected participants.
+    A user can edit an existing expense.
+    When an expense is edited, the system should update balances correctly (conceptually by reversing the old expense and applying the new one).
+
+>>Currency Support
+    Every expense has an associated currency.
+    The system supports multiple currencies.
+
+>>Balance Management
+    The system maintains balances incrementally whenever:
+        an expense is added,
+        an expense is edited,
+        an expense is settled.
+    The goal is fast balance retrieval.
+
+ 
+Entities 
+
+ *User
+    Represents a person in the system.
+ *Group
+    Represents a group of users and its expenses.
+ *Expense
+    Represents a financial transaction.
+ *Balance
+    Represents the outstanding amount between two users.
+ *ExpenseParticipant
+    Represents a user participation in an expense.
+    Stores the user and the amount owed for that expense.
+ *Currency
+    Enum.
+
+| Relationship                 | Your Answer  |
+| ---------------------------- | ------------ |
+| User ↔ Group                 | Many-to-Many |
+| User ↔ ExpenseParticipant    | One-to-Many  |
+| Group ↔ Expense              | One-to-Many  |
+| Group ↔ Balance              | One-to-Many  |
+| Expense ↔ ExpenseParticipant | One-to-Many  |
+
+
+User
+----
+    int id;
+    string name;
+
+    getId()
+    getName()
+
+Group
+------
+    id
+    string name
+    List<User> members;
+    List<Expense> expenses;
+    Currency currency;
+    List<Balance> balances;
+
+    addMember(User user)
+    addExpense(Expense expense)
+    removeExpense(Expense expense)
+    findBalance(User creditor, User debtor)
+    applyBalanceChange(...)
+
+Expenses
+---------
+    id
+    User payer;
+    double amount;
+    List<ExpenseParticipant> participants;
+    String description;
+
+    getId()
+    getPayer()
+    getParticipants()
+
+    updateDescription(...)
+    updateAmount(...)
+    updateParticipants(...)
+
+balances
+--------
+    User creditor;
+    User debtor;
+    double amount;
+
+    getCreditor()
+    getDebtor()
+    getAmount()
+
+    increaseAmount(double amount)
+    decreaseAmount(double amount)
+    settle(double amount)
+
+ExpenseParticipant
+------------------
+    User user;
+    double amount;
+
+    getUser()
+    getAmount()
+    updateAmount(double amount) 
+
+ExpenseManager
+---------------
+    addExpense(...)
+    editExpense(...)
+    deleteExpense(...)
+    validateExpense(...)
+
+GroupManager
+------------
+    createGroup(...)
+    deleteGroup(...)   
+
+SettlementOptimizer
+-------------------
+    generateSettlementSuggestions(Group group)    
+
+
+User clicks Add Expense
+        ↓
+ExpenseManager.addExpense(...)
+        ↓
+Validate request
+        ↓
+Create Expense
+        ↓
+Create ExpenseParticipants
+        ↓
+Group.addExpense(expense)
+        ↓
+Group updates existing Balance(s)
+        ↓
+Done
+
+
+const std::string& getName() const
+      ↑                  ↑
+      |                  |
+Can't modify         Function won't
+returned string      modify User object
+
