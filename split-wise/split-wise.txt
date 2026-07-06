@@ -110,7 +110,6 @@ balances
 
     increaseAmount(double amount)
     decreaseAmount(double amount)
-    settle(double amount)
 
 ExpenseParticipant
 ------------------
@@ -161,3 +160,100 @@ const std::string& getName() const
 Can't modify         Function won't
 returned string      modify User object
 
+
+
+applyBalanceChange ---->>>>>Algorithm
+------------------------------------------
+ Skip if participant == payer
+
+share = participant.getAmount()
+
+1. Look for Balance(payer, participant)
+
+   Found?
+      YES → increaseAmount(share)
+      NO  → Go to Step 2
+
+2. Look for Balance(participant, payer)
+
+   Found?
+      NO  → Create Balance(payer, participant, share)
+
+      YES →
+
+           if existingBalance.amount > share
+
+                existingBalance.decreaseAmount(share)
+
+           else if existingBalance.amount == share
+
+                Remove existingBalance
+
+           else
+
+                remaining = share - existingBalance.amount
+
+                Remove existingBalance
+
+                Create Balance(
+                    payer,
+                    participant,
+                    remaining
+                )
+
+
+
+                 Group
+        -----------------------
+        Members
+        Expenses
+        Balances
+        -----------------------
+                 │
+                 │ Read Only
+                 ▼
+        SettlementOptimizer
+                 │
+        Computes Net Balances
+                 │
+        Runs Greedy Algorithm
+                 │
+                 ▼
+      SettlementSuggestion List
+                 │
+                 ▼
+             Display to User
+
+
+        Create Users
+                │
+                ▼
+        Create Group
+                │
+                ▼
+        Add Members
+                │
+                ▼
+        Add Expense #1
+                │
+                ▼
+        Group updates balances
+                │
+                ▼
+        Add Expense #2
+                │
+                ▼
+        Group updates balances
+                │
+                ▼
+        Print Current Balances
+                │
+                ▼
+        SettlementOptimizer
+                │
+                ▼
+        Generate Suggestions
+                │
+                ▼
+        Print Suggestions            
+                
