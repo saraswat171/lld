@@ -1,0 +1,79 @@
+                 Client
+                   |
+                   v
+            ┌─────────────┐
+            │ RateLimiter │
+            │  Context    │
+            └──────┬──────┘
+                   │
+                   │ owns
+                   ▼
+        ┌─────────────────────┐
+        │ RateLimitStrategy   │
+        │     interface       │
+        └──────────┬──────────┘
+                   △
+          ┌────────┴─────────┐
+          │                  │
+          │                  │
+ ┌────────┴────────┐  ┌──────┴─────────┐
+ │ TokenBucket     │  │ FixedWindow    │
+ │ Strategy        │  │ Strategy       │
+ └─────────────────┘  └────────────────┘
+
+
+
+
+                    TokenBucketStrategy
+                           |
+                    ┌──────┴──────┐
+                    │  mapMutex   │
+                    └──────┬──────┘
+                           |
+                     unordered_map
+                           |
+          ┌────────────────┼────────────────┐
+          ↓                ↓                ↓
+       user1             user2             user3
+       Bucket            Bucket            Bucket
+         |                 |                 |
+       mutex             mutex             mutex
+       
+
+RateLimiter created
+      ↓
+owns strategy
+      ↓
+RateLimiter destroyed
+      ↓
+unique_ptr automatically destroys strategy
+      ↓
+no memory leak ✅
+
+
+"The map mutex protects the shared unordered_map from concurrent access and insertion.
+ Once I obtain the bucket for a key, I release the map mutex and acquire that bucket's
+ mutex to protect its token and timestamp state. This allows requests for different
+ keys to execute concurrently while requests for the same key are serialized."
+
+mapMutex -> Protects:-"Which bucket belongs to this key?" --> Specifically:-buckets
+bucket.mutex -> Protects:-"What is the current state of this bucket?" --> Specifically:- bucket.tokens , bucket.lastRefill
+
+             RateLimiter
+                  |
+                  v
+        ┌──────────────────┐
+        │   unordered_map  │
+        │                  │
+        │ mapMutex 🔒      │
+        └────────┬─────────┘
+                 |
+       +---------+---------+
+       |                   |
+       v                   v
+   user1 bucket        user2 bucket
+       |                   |
+    mutex 🔒            mutex 🔒
+       |                   |
+    tokens              tokens
+    lastRefill          lastRefill
