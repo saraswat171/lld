@@ -1,0 +1,51 @@
+Design a system that allows users to:-
+ > Search movies by city
+ > View shows and theatres
+ > Select seats
+ > Book tickets and make payments
+
+Example of non - functional lld requiurements :- 
+ Users book seats for one show at a time.
+ Payment succeeds or fails atomically.
+ A booking is confirmed only after successful payment.
+ Seat availability is updated in real time.
+ Seat hold expires after a timeout (optional, depending on scope). 
+
+✅ One Booking is created when the first seat is selected.
+✅ One timer per Booking.
+✅ Each selected seat enters the HELD state.
+✅ The booking stores holdExpiryTime.
+✅ If payment succeeds before holdExpiryTime, all seats transition from HELD → BOOKED.
+✅ If the timer expires first, the booking becomes EXPIRED and all held seats become AVAILABLE.
+
+Entity :- 
+ Users
+ cinemas /theatre
+ Movies - Owns movie data
+ screens
+ Shows - Own show timing and metadata and a collection of ShowSeat objects
+ seats - has only seats metadata
+ ShowSeat - seat availability for a particular show
+ bookings - Represents a user's reservation for one show and tracks its lifecycle (HELD, CONFIRMED, EXPIRED).
+ payment - Represents a payment transaction and tracks its status (PENDING, SUCCESS, FAILED).
+
+A Cinema has many screen , a screen has many shows , each show has one movie
+Class modeling :-
+ Seat
+  attributes:- seatId , row , seatNumber , seatCategory 
+
+  methods:-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+  
+ ShowSeat
+  attributes:- showSeatId , showId , seatId , seatStatus , heldByBookingId
+
+  methods:- holdSeat() → set heldByBookingId , bookSeat() → clear heldByBookingId , releaseHold() → clear heldByBookingId , isAvailable()
+
+ Booking
+  attributes:- bookingId , userId (or User) , show , List<ShowSeat> , status , holdExpiryTime
+
+  methods:- confirmBooking() , expireBooking()
+
+  
+
+
